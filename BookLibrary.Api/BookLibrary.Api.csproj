@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookLibrary.Application\BookLibrary.Application.csproj" />
+    <ProjectReference Include="..\BookLibrary.Infra.WebFramework\BookLibrary.Infra.WebFramework.csproj" />
   </ItemGroup>
 
 </Project>

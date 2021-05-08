@@ -3,6 +3,7 @@ using BookLibrary.Domain.Domains.Books;
 using BookLibrary.Domain.Dtos.Book;
 using BookLibrary.Domain.Interfaces.WriteRepositories.Book;
 using BookLibrary.Infra.Data.Data;
+using BookLibrary.Infra.WebFramework.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace BookLibrary.Infra.Data.Repositories.WriteRepositories
         public async Task InsertBook(InsertBookDto model)
         {
             if (model == null)
-                throw new Exception("model is null");
+                throw new ApiException(statusCode: System.Net.HttpStatusCode.BadRequest);
             var bookModel = mapper.Map<Book>(model);
             await _books.AddAsync(bookModel);
         }

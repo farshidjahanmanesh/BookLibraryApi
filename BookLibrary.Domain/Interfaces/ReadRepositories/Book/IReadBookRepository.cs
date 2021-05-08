@@ -10,5 +10,6 @@ namespace BookLibrary.Domain.Interfaces.ReadRepositories.Book
     public interface IReadBookRepository
     {
         Task<BookListDto> GetBooksAsync(string name = "", int count = 1);
+        Task<BookItemDto> GetBookByAsync(int id);
     }
 }

@@ -17,6 +17,8 @@ namespace BookLibrary.Infra.Data.AutoMapper
         {
             CreateMap<InsertBookDto, Book>();
             CreateMap<InsertAuthorDto, Author>();
+            CreateMap<Book, BookItemDto>();
+            CreateMap<Author, AuthorItemDto>();
         }
     }
 }

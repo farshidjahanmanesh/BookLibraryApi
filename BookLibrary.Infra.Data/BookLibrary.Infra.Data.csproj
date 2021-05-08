@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookLibrary.Domain\BookLibrary.Domain.csproj" />
+    <ProjectReference Include="..\BookLibrary.Infra.WebFramework\BookLibrary.Infra.WebFramework.csproj" />
   </ItemGroup>
 
 </Project>
