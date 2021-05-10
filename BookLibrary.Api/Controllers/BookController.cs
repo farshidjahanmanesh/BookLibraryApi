@@ -6,10 +6,16 @@ using BookLibrary.Application.UseCases.Queries.GetListOfBooksQuery;
 using BookLibrary.Domain.Dtos.Author;
 using BookLibrary.Domain.Dtos.Book;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,11 +27,13 @@ namespace BookLibrary.Api.Controllers
     {
         private readonly IMediator mediator;
         private readonly IMapper mapper;
+        private readonly ILogger<BookController> logger;
 
-        public BookController(IMediator mediator, IMapper mapper)
+        public BookController(IMediator mediator, IMapper mapper, ILogger<BookController> logger)
         {
             this.mediator = mediator;
             this.mapper = mapper;
+            this.logger = logger;
         }
         [HttpGet]
         public async Task<ActionResult> GetListOfBook(BookSearchInputsDto inputsDto)
@@ -44,11 +52,13 @@ namespace BookLibrary.Api.Controllers
             return Ok(bookItemDto);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<ActionResult> InsertBook(InsertBookDto createBook)
         {
             await mediator.Send(new CreateBookCommand(createBook));
             return Ok();
         }
+
     }
 }

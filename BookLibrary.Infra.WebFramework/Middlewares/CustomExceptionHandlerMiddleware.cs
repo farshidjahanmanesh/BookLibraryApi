@@ -3,6 +3,8 @@ using BookLibrary.Infra.WebFramework.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,12 +27,14 @@ namespace BookLibrary.Infra.WebFramework.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly IWebHostEnvironment _env;
+        private readonly ILogger<CustomExceptionHandlerMiddleware> _logger;
 
         public CustomExceptionHandlerMiddleware(RequestDelegate next,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,ILogger<CustomExceptionHandlerMiddleware> logger)
         {
             _next = next;
             _env = env;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -43,20 +47,30 @@ namespace BookLibrary.Infra.WebFramework.Middlewares
             {
                 await _next(context);
             }
+
             catch (ApiException exception)
             {
                 httpStatusCode = exception.StatusCode;
                 message = exception.AdditionalData.ToString();
+                _logger.LogError(message, exception);
                 await WriteToResponseAsync();
             }
             catch (UnauthorizedAccessException exception)
             {
                 SetUnAuthorizeResponse(exception);
+                _logger.LogError(message, exception);
                 await WriteToResponseAsync();
             }
-            catch (Exception)
+            catch (SecurityTokenExpiredException exception)
+            {
+                _logger.LogError(exception, exception.Message);
+                SetUnAuthorizeResponse(exception);
+                await WriteToResponseAsync();
+            }
+            catch (Exception exception)
             {
                 message = "have server error";
+                _logger.LogError(message, exception);
                 await WriteToResponseAsync();
             }
             async Task WriteToResponseAsync()

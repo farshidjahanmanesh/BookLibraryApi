@@ -24,6 +24,8 @@ namespace BookLibrary.Infra.WebFramework.Api
                     return "Ok";
                 case 400:
                     return "Invalid Input";
+                case 401:
+                    return "you are unAuthorize";
                 case 404:
                     return "Resource not found";
                 case 500:

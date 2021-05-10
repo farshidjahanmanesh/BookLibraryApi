@@ -2,6 +2,7 @@
 using BookLibrary.Infra.WebFramework.Api.ApiResponses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,8 +43,12 @@ namespace BookLibrary.Infra.WebFramework.Filters
                             var apiNotFoundResult = new ApiNotFoundResponse(url, GetInformationDatas(objResult));
                             context.Result = new JsonResult(apiNotFoundResult) { StatusCode = apiNotFoundResult.StatusCode };
                             break;
+                        case 415:
+                            var apiUnSupportResult = new ApiUnSupportResponse(url);
+                            context.Result = new JsonResult(apiUnSupportResult) { StatusCode = apiUnSupportResult.StatusCode };
+                            break;
                         case null:
-                            if(objResult.Value is not ApiResponse)
+                            if (objResult.Value is not ApiResponse)
                             {
                                 var apiObjResult = new ApiOkResponse(objResult.Value, url);
                                 context.Result = new JsonResult(apiObjResult) { StatusCode = apiObjResult.StatusCode };
