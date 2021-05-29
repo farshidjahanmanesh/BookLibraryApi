@@ -1,6 +1,7 @@
 ﻿using BookLibrary.Domain.Domains.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +13,7 @@ namespace BookLibrary.Infra.Data.Data
 
     public class BookLibraryDbContext : IdentityDbContext<User>
     {
-        public BookLibraryDbContext(DbContextOptions<BookLibraryDbContext> options):base(options)
-        {
-
-        }
+        public BookLibraryDbContext(DbContextOptions<BookLibraryDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,4 +22,5 @@ namespace BookLibrary.Infra.Data.Data
         }
 
     }
+
 }

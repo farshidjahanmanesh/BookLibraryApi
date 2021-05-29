@@ -1,4 +1,4 @@
-﻿namespace BookLibrary.Infra.WebFramework.Configuration
+﻿namespace BookLibrary.Infra.WebFramework.Services
 {
     public class JwtConfigs
     {
@@ -6,5 +6,6 @@
         public string Key { get; set; }
         public string Issuer { get; set; }
         public int ExpireMin { get; set; }
+        public int ExpireRefreshTokenDay { get; set; }
     }
 }

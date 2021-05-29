@@ -1,39 +1,33 @@
+using AspNetCoreRateLimit;
+using BookLibrary.Application.MediatR.PipeLines;
+using BookLibrary.Application.Services;
+using BookLibrary.Common.Exceptions;
+using BookLibrary.Domain.Domains.Users;
 using BookLibrary.Domain.Interfaces.ReadRepositories.Book;
 using BookLibrary.Domain.Interfaces.WriteRepositories.Book;
 using BookLibrary.Infra.Data.Data;
 using BookLibrary.Infra.Data.Repositories.ReadRepositories;
 using BookLibrary.Infra.Data.Repositories.WriteRepositories;
+using BookLibrary.Infra.WebFramework.Configurations;
+using BookLibrary.Infra.WebFramework.Filters;
+using BookLibrary.Infra.WebFramework.Middlewares;
+using BookLibrary.Infra.WebFramework.Services;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using BookLibrary.Infra.WebFramework.Filters;
-using BookLibrary.Infra.WebFramework.Middlewares;
-using BookLibrary.Application.MediatR.PipeLines;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using System;
+using System.Reflection;
 using System.Text;
-using BookLibrary.Infra.WebFramework.Configuration;
-using BookLibrary.Domain.Domains.Users;
-using Microsoft.AspNetCore.Identity;
-using BookLibrary.Infra.WebFramework.Api;
-using BookLibrary.Infra.WebFramework.Exceptions;
-using AspNetCoreRateLimit;
 
 namespace BookLibrary.Api
 {
-
-
 
     public class Startup
     {
@@ -62,9 +56,10 @@ namespace BookLibrary.Api
 
             services.Configure<JwtConfigs>(Configuration.GetSection(JwtConfigs.JwtAuth));
             services.AddMediatR(Assembly.Load("BookLibrary.Application"));
-            services.AddAutoMapper(typeof(BookLibraryDbContext).Assembly, typeof(Startup).Assembly);
+            services.AddAutoMapper(Assembly.Load("BookLibrary.Infra.WebFramework"), typeof(Startup).Assembly);
             services.AddScoped<IWriteBookRepository, WriteBookRepository>();
             services.AddScoped<IReadBookRepository, ReadBookRepository>();
+            services.AddScoped(typeof(Lazy<>), typeof(Lazy<>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
             services.AddIdentity<User, IdentityRole>()
@@ -77,6 +72,7 @@ namespace BookLibrary.Api
             })
              .AddJwtBearer(options =>
              {
+                 options.SaveToken = true;
                  options.TokenValidationParameters = new()
                  {
                      ValidateIssuer = true,
@@ -85,7 +81,9 @@ namespace BookLibrary.Api
                      ValidateIssuerSigningKey = true,
                      ValidIssuer = Configuration["JwtAuth:Issuer"],
                      ValidAudience = Configuration["JwtAuth:Issuer"],
-                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuth:Key"]))
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtAuth:Key"])),
+                     // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+                     ClockSkew = TimeSpan.Zero
                  };
                  options.Events = new JwtBearerEvents()
                  {
@@ -128,9 +126,9 @@ namespace BookLibrary.Api
             //inject counter and rules stores
             services.AddSingleton<IClientPolicyStore, MemoryCacheClientPolicyStore>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitByUserIdentifierConfiguration>();
             #endregion
-
+            services.AddTransient<IReadDataFromApi, OpenLibraryApi>();
 
 
         }
@@ -143,7 +141,6 @@ namespace BookLibrary.Api
             //}
             app.UseCustomExceptionHandler();
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseClientRateLimiting();

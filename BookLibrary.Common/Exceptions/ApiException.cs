@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookLibrary.Infra.WebFramework.Exceptions
+namespace BookLibrary.Common.Exceptions
 {
     public class ApiException : Exception
     {
@@ -15,7 +15,7 @@ namespace BookLibrary.Infra.WebFramework.Exceptions
         {
             this.StatusCode = statusCode;
         }
-        public ApiException(HttpStatusCode statusCode,object additionalData):this(statusCode)
+        public ApiException(HttpStatusCode statusCode, object additionalData) : this(statusCode)
         {
             this.AdditionalData = additionalData;
         }

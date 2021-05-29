@@ -13,8 +13,8 @@ namespace BookLibrary.Domain.Dtos.Author
         public string Name { get; set; }
         public string OpenLibraryId { get; set; }
         public string Description { get; set; }
-        public string WikipediaUrl { get; set; }
-        public DateTime Birthday { get; set; }
+        public string? WikipediaUrl { get; set; }
+        public string Birthday { get; set; }
 
         #region navigartion property
         public IList<BookItemDto> Books { get; set; }

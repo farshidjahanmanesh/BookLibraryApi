@@ -13,7 +13,7 @@ namespace BookLibrary.Domain.Domains.Authors
         {
             Books = new List<Book>();
         }
-        public Author(string name,string openLibraryId, string description, string wikipediaUrl, DateTime birthday) : base()
+        public Author(string name,string openLibraryId, string description, string wikipediaUrl, string birthday) : base()
         {
             this.Name = name;
             this.OpenLibraryId = openLibraryId;
@@ -26,7 +26,7 @@ namespace BookLibrary.Domain.Domains.Authors
         public string OpenLibraryId { get; set; }
         public string Description { get; set; }
         public string WikipediaUrl { get; set; }
-        public DateTime Birthday { get; set; }
+        public string Birthday { get; set; }
 
         #region navigartion property
         public IList<Book> Books { get; set; }

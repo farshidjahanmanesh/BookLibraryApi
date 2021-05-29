@@ -11,5 +11,7 @@ namespace BookLibrary.Domain.Interfaces.ReadRepositories.Book
     {
         Task<BookListDto> GetBooksAsync(string name = "", int count = 1);
         Task<BookItemDto> GetBookByAsync(int id);
+        Task<BookItemDto> GetBookByNameAsync(string name);
+        Task<bool> CheckIsBookInDb(string bookName);
     }
 }

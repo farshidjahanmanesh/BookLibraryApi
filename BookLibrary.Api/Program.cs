@@ -23,9 +23,9 @@ namespace BookLibrary.Api
             {
                 o.StackTraceMode = Sentry.StackTraceMode.Enhanced;
                 // Debug and higher are stored as breadcrumbs (default is Information)
-                o.MinimumBreadcrumbLevel = LogEventLevel.Debug;
+                o.MinimumBreadcrumbLevel = LogEventLevel.Error;
                 // Warning and higher is sent as event (default is Error)
-                o.MinimumEventLevel = LogEventLevel.Warning;
+                o.MinimumEventLevel = LogEventLevel.Error;
                 o.Dsn = "https://c7bd54a406704515922209d7ea18b1ac@o441487.ingest.sentry.io/5755576";
                 o.Environment = "development";
             })
@@ -45,6 +45,7 @@ namespace BookLibrary.Api
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+           
                 .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

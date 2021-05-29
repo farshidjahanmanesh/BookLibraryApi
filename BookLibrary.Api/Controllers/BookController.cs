@@ -1,22 +1,17 @@
 ﻿using AutoMapper;
 using BookLibrary.Api.Dtos;
+using BookLibrary.Application.Services;
 using BookLibrary.Application.UseCases.Commands.CreateBookCommand;
 using BookLibrary.Application.UseCases.Queries.GetBookByIdQuery;
+using BookLibrary.Application.UseCases.Queries.GetBookByNameQuery;
 using BookLibrary.Application.UseCases.Queries.GetListOfBooksQuery;
-using BookLibrary.Domain.Dtos.Author;
 using BookLibrary.Domain.Dtos.Book;
+using BookLibrary.Domain.Interfaces.ReadRepositories.Book;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BookLibrary.Api.Controllers
@@ -28,13 +23,18 @@ namespace BookLibrary.Api.Controllers
         private readonly IMediator mediator;
         private readonly IMapper mapper;
         private readonly ILogger<BookController> logger;
+        private readonly IReadDataFromApi s;
 
-        public BookController(IMediator mediator, IMapper mapper, ILogger<BookController> logger)
+        public BookController(IMediator mediator, IMapper mapper, ILogger<BookController> logger, IReadDataFromApi s,
+            Lazy<IReadBookRepository> read)
         {
             this.mediator = mediator;
             this.mapper = mapper;
             this.logger = logger;
+            this.s = s;
         }
+
+        //[Authorize]
         [HttpGet]
         public async Task<ActionResult> GetListOfBook(BookSearchInputsDto inputsDto)
         {
@@ -43,7 +43,8 @@ namespace BookLibrary.Api.Controllers
             return Ok(bookListDto);
         }
 
-        [HttpGet("{bookId}")]
+        //[Authorize]
+        [HttpGet("{bookId:int}")]
         public async Task<ActionResult> GetBookById(int bookId)
         {
             if (bookId <= 0)
@@ -51,8 +52,16 @@ namespace BookLibrary.Api.Controllers
             var bookItemDto = await mediator.Send(new GetBookByIdQuery(bookId));
             return Ok(bookItemDto);
         }
+        [HttpGet("{bookName}")]
+        public async Task<ActionResult> GetBookByName(string bookName)
+        {
+            var bookItem = await mediator.Send(new GetBookByNameQuery(bookName));
+            if (bookItem == null)
+                return NotFound("This Book Not Found");
+            return Ok(bookItem);
+        }
 
-        [Authorize(Roles = "admin")]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> InsertBook(InsertBookDto createBook)
         {

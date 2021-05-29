@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using BookLibrary.Common.Exceptions;
 using BookLibrary.Domain.Domains.Books;
 using BookLibrary.Domain.Dtos.Book;
 using BookLibrary.Domain.Interfaces.ReadRepositories.Book;
 using BookLibrary.Infra.Data.Data;
-using BookLibrary.Infra.WebFramework.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -30,11 +30,11 @@ namespace BookLibrary.Infra.Data.Repositories.ReadRepositories
         public async Task<BookItemDto> GetBookByAsync(int id)
         {
             if (id <= 0)
-                throw new ApiException(statusCode: System.Net.HttpStatusCode.BadRequest,"id is not valid");
+                throw new ApiException(statusCode: System.Net.HttpStatusCode.BadRequest, "id is not valid");
             var bookEntity = await _booksAsNoTracking.Include(c => c.Authors).FirstOrDefaultAsync(c => c.Id == id);
             if (bookEntity == null)
             {
-                throw new ApiException(statusCode: System.Net.HttpStatusCode.NotFound,"book with this id not found");
+                throw new ApiException(statusCode: System.Net.HttpStatusCode.NotFound, "book with this id not found");
             }
             var bookDto = mapper.Map<BookItemDto>(bookEntity);
             return bookDto;
@@ -57,6 +57,19 @@ namespace BookLibrary.Infra.Data.Repositories.ReadRepositories
                 booksDto.Books = mapper.Map<List<BookItemDto>>(countNumberOfBooks);
             }
             return booksDto;
+        }
+
+        public async Task<bool> CheckIsBookInDb(string bookName)
+        {
+            return await _booksAsNoTracking.AnyAsync(c => c.Title.ToLower() == bookName.ToLower());
+        }
+
+        public async Task<BookItemDto> GetBookByNameAsync(string name)
+        {
+            var bookObject = await _booksAsNoTracking
+                .Include(c=>c.Authors)
+                .FirstOrDefaultAsync(c => c.Title.ToLower().Contains(name.ToLower()));
+            return mapper.Map<BookItemDto>(bookObject);
         }
     }
 

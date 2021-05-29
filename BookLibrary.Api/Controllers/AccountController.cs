@@ -1,6 +1,6 @@
 ﻿using BookLibrary.Api.Dtos;
 using BookLibrary.Domain.Domains.Users;
-using BookLibrary.Infra.WebFramework.Configuration;
+using BookLibrary.Infra.WebFramework.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,34 +20,35 @@ namespace BookLibrary.Api.Controllers
         private readonly SignInManager<User> signInManager;
         private readonly JwtService jwtService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager,JwtService jwtService)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, JwtService jwtService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.jwtService = jwtService;
         }
+
         [HttpGet]
         public async Task SignUp()
         {
             await userManager.CreateAsync(new Domain.Domains.Users.User()
             {
-                Email="samicancel2@gmail.com",
+                Email = "samicancel2@gmail.com",
                 UserName = "samicancel2@gmail.com",
-                
 
-            },"F@rshid123");
+
+            }, "F@rshid123");
         }
         [HttpPost]
-        public async Task<ActionResult> Login(LoginDto loginData,[FromServices] IOptions<JwtConfigs> options)
+        public async Task<ActionResult> Login(LoginDto loginData, [FromServices] IOptions<JwtConfigs> options)
         {
             var user = await userManager.FindByNameAsync(loginData.Username);
             if (user != null)
             {
-                var checkPassResult = await signInManager.PasswordSignInAsync(user, loginData.Password, false, false);
+                var checkPassResult = await signInManager.PasswordSignInAsync(user, loginData.Password, true, false);
                 if (checkPassResult.Succeeded)
                 {
-                    var token = jwtService.GenerateJwtToken(User);
-                    return Ok(new LoginResultDto(user.UserName,options.Value.ExpireMin,token));
+                    var token = await jwtService.Authentication(user);
+                    return Ok(new LoginResultDto(user.UserName, options.Value.ExpireMin, token));
                 }
                 else
                 {
@@ -56,5 +57,15 @@ namespace BookLibrary.Api.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost("RefreshToken")]
+        public async Task<ActionResult> RefreshToken(RefreshTokenDto tokenDto)
+        {
+            var token = await jwtService.RefreshToken(tokenDto.RefreshToken);
+            if (token == null)
+                return Unauthorized(new { message = "Invalid token" });
+            return Ok(token);
+        }
+
     }
 }

@@ -1,5 +1,5 @@
-﻿using BookLibrary.Infra.WebFramework.Api;
-using BookLibrary.Infra.WebFramework.Exceptions;
+﻿using BookLibrary.Common.Exceptions;
+using BookLibrary.Infra.WebFramework.Api;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -69,7 +69,8 @@ namespace BookLibrary.Infra.WebFramework.Middlewares
             }
             catch (Exception exception)
             {
-                message = "have server error";
+                message = exception.Message;
+                //message = "have server error";
                 _logger.LogError(message, exception);
                 await WriteToResponseAsync();
             }

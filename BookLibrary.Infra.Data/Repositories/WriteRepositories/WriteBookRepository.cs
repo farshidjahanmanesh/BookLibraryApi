@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
+using BookLibrary.Common.Exceptions;
 using BookLibrary.Domain.Domains.Books;
 using BookLibrary.Domain.Dtos.Book;
 using BookLibrary.Domain.Interfaces.WriteRepositories.Book;
 using BookLibrary.Infra.Data.Data;
-using BookLibrary.Infra.WebFramework.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

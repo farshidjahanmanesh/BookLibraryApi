@@ -8,7 +8,7 @@ namespace BookLibrary.Domain.Dtos.Author
         public string OpenLibraryId { get; set; }
         public string Description { get; set; }
         public string WikipediaUrl { get; set; }
-        public DateTime Birthday { get; set; }
+        public string Birthday { get; set; }
 
     }
 }
